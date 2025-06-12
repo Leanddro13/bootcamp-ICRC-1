@@ -6,6 +6,16 @@
       "wasm": "https://github.com/dfinity/ic/releases/download/ledger-suite-icrc-2025-05-22/ic-icrc1-ledger.wasm.gz",
       "init_arg": "(variant {Init = record { token_symbol = \"EXTC\"; token_name = \"Exercicio Coin\"; minting_account = record { owner = principal \"jogea-mt2wq-ly56u-n4eq6-33ifj-ng7xs-hobho-rt3h4-j33vt-zqbei-gae\" }; transfer_fee = 10_000; metadata = vec {}; feature_flags = opt record{icrc2 = true}; initial_balances = vec { record { record { owner = principal \"rn4mw-2yszo-o5uqv-c3xkk-fhn2t-iz6kk-vmwpd-oqcb2-oqbxa-doeai-aae\"; }; 100_000_000_000; }; }; archive_options = record { num_blocks_to_archive = 1000; trigger_threshold = 2000; controller_id = principal \"7afph-rzi7b-xmpsn-w4m33-exby2-4lhch-pdws3-7kvyd-7yqlb-js7m7-eae\"; cycles_for_archive_creation = opt 10000000000000; }; } })"
     },
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+      "shrink": false,
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"               
+        }}
+      },       
     "btoken_backend": {
       "main": "src/btoken_backend/main.mo",
       "type": "motoko"
