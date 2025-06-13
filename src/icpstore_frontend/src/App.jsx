@@ -19,40 +19,7 @@ function App() {
     init();
   }, []);  
 
-
-  async function getAccountFromBalance(account) {
-   
-    try {
-        if (account != '') {                        
-            setFrom(account);
-            const result = await icpstore_backend.getBalance(Principal.fromText(account));
-            setBalancesFrom(parseInt(result));  
-            setMessage('');
-        }
-    } catch (error) {
-        console.dir(error);
-        setBalancesFrom(0);  
-        setMessage('Ocorreu uma falha ao retornar o saldo da Conta de Origem');
-    }
-  }
-
-  // função utilizada para obter o saldo de tokens da conta de destino
-  async function getAccountToBalance(account) {
-   
-    try {
-        if (account != '') {                        
-            setTo(account);
-            const result = await icpstore_backend.getBalance(Principal.fromText(account));
-            setBalancesTo(parseInt(result));  
-            setMessage('');
-        }
-    } catch (error) {
-        console.dir(error);
-        setBalancesTo(0);  
-        setMessage('Ocorreu uma falha ao retornar o saldo da Conta de Destino');
-    }
-  } 
-
+  const lojaCanisterId = process.env.CANISTER_ID_ICPSTORE_BACKEND;
 
   const comprarProduto = async (produto) => {
     try {
@@ -62,8 +29,6 @@ function App() {
         return;
       }
   
-
-
       // Conecta a Plug Wallet se necessário
       let isConnected = await window.ic.plug.isConnected();
       if (!isConnected) {
@@ -84,8 +49,6 @@ function App() {
   
       // Prepara a transferência
       const valor = BigInt(produto.price);
-      const lojaCanisterId = process.env.CANISTER_ID_ICPSTORE_BACKEND;
-  
       const args = {
         to: {
           owner: Principal.fromText(lojaCanisterId),
@@ -93,7 +56,7 @@ function App() {
         },
         amount: valor,
         memo: [],
-        fee: [BigInt(10)],
+        fee: [BigInt(10000)],
         from_subaccount: [],
         created_at_time: []
       };
@@ -110,9 +73,6 @@ function App() {
       console.error("Erro ao comprar:", error);
       alert("A transferência foi concluída com sucesso, mas com algumas ressalvas: " + error.message);
     }
-
-    await getAccountFromBalance(lojaCanisterId);
-    await getAccountToBalance(lojaCanisterId);
   };
 
   return (

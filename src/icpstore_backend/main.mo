@@ -2,7 +2,6 @@ import Array "mo:base/Array";
 import Principal "mo:base/Principal";
 import Nat32 "mo:base/Nat32";
 import Char "mo:base/Char";
-// import IscLedger "canister:icpsc_icrc1_ledger_canister";
 
 actor {
   
@@ -26,7 +25,8 @@ actor {
 
   stable var orders: [Order] = [];
 
-   public func textToNat( txt : Text) : async Nat {
+  // Função para converter texto em Nat
+  public func textToNat( txt : Text) : async Nat {
     assert(txt.size() > 0);
     let chars = txt.chars();
 
@@ -39,14 +39,8 @@ actor {
 
     num;
   };
-
-  /*
-  public func getBalance(owner: Principal): async Nat {
-    let balance = await IscLedger.icrc1_balance_of({owner = owner; subaccount = null});
-    return balance;
-  };
-  */
   
+  // Função para registrar a compra de produtos
   public shared({ caller }) func registerPurchase(product: Product, amount: Nat) : async PurchaseResult {
 
     let priceNat = await textToNat(product.price);
@@ -64,7 +58,6 @@ actor {
     orders := Array.append(orders, [order]);
     return {sucess = true; message = "Compra registrada com sucesso!"};
   };
-
 
   public query func getProducts() : async [Product] {    
       
