@@ -1,4 +1,8 @@
 import Array "mo:base/Array";
+import Principal "mo:base/Principal";
+import Nat32 "mo:base/Nat32";
+import Char "mo:base/Char";
+// import IscLedger "canister:icpsc_icrc1_ledger_canister";
 
 actor {
   
@@ -9,6 +13,59 @@ actor {
     image: Text;    
   };    
   
+  type PurchaseResult = {
+    sucess: Bool;
+    message: Text;
+  };
+
+  type Order = {
+    product: Product;
+    buyer: Principal;
+    amount: Nat32;
+  };
+
+  stable var orders: [Order] = [];
+
+   public func textToNat( txt : Text) : async Nat {
+    assert(txt.size() > 0);
+    let chars = txt.chars();
+
+    var num : Nat = 0;
+    for (v in chars){
+      let charToNum = Nat32.toNat(Char.toNat32(v)-48);
+      assert(charToNum >= 0 and charToNum <= 9);
+      num := num * 10 +  charToNum;          
+    };
+
+    num;
+  };
+
+  /*
+  public func getBalance(owner: Principal): async Nat {
+    let balance = await IscLedger.icrc1_balance_of({owner = owner; subaccount = null});
+    return balance;
+  };
+  */
+  
+  public shared({ caller }) func registerPurchase(product: Product, amount: Nat) : async PurchaseResult {
+
+    let priceNat = await textToNat(product.price);
+
+    if(amount < priceNat){
+      return {sucess = false; message = "Pagamento insuficiente!"};
+    };
+    
+    let order: Order = {
+      product = product;
+      buyer = caller;
+      amount = Nat32.fromNat(amount);
+    };
+
+    orders := Array.append(orders, [order]);
+    return {sucess = true; message = "Compra registrada com sucesso!"};
+  };
+
+
   public query func getProducts() : async [Product] {    
       
       var products : [Product] = []; 

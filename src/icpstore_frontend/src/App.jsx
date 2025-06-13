@@ -19,6 +19,102 @@ function App() {
     init();
   }, []);  
 
+
+  async function getAccountFromBalance(account) {
+   
+    try {
+        if (account != '') {                        
+            setFrom(account);
+            const result = await icpstore_backend.getBalance(Principal.fromText(account));
+            setBalancesFrom(parseInt(result));  
+            setMessage('');
+        }
+    } catch (error) {
+        console.dir(error);
+        setBalancesFrom(0);  
+        setMessage('Ocorreu uma falha ao retornar o saldo da Conta de Origem');
+    }
+  }
+
+  // função utilizada para obter o saldo de tokens da conta de destino
+  async function getAccountToBalance(account) {
+   
+    try {
+        if (account != '') {                        
+            setTo(account);
+            const result = await icpstore_backend.getBalance(Principal.fromText(account));
+            setBalancesTo(parseInt(result));  
+            setMessage('');
+        }
+    } catch (error) {
+        console.dir(error);
+        setBalancesTo(0);  
+        setMessage('Ocorreu uma falha ao retornar o saldo da Conta de Destino');
+    }
+  } 
+
+
+  const comprarProduto = async (produto) => {
+    try {
+      // Verifica se a Plug Wallet está instalada
+      if (!window.ic?.plug) {
+        console.error("Plug Wallet não instalada!");
+        return;
+      }
+  
+
+
+      // Conecta a Plug Wallet se necessário
+      let isConnected = await window.ic.plug.isConnected();
+      if (!isConnected) {
+        await window.ic.plug.requestConnect({
+          whitelist: [canisterLedgerId],
+          host: host
+        });
+      }
+      
+      // Obtém o principal do usuário
+      const principal = await window.ic.plug.agent.getPrincipal();
+  
+      // Cria o actor da ledger
+      const actorLedger = await window.ic.plug.createActor({
+        canisterId: canisterLedgerId,
+        interfaceFactory: idlFactory
+      });
+  
+      // Prepara a transferência
+      const valor = BigInt(produto.price);
+      const lojaCanisterId = process.env.CANISTER_ID_ICPSTORE_BACKEND;
+  
+      const args = {
+        to: {
+          owner: Principal.fromText(lojaCanisterId),
+          subaccount: []
+        },
+        amount: valor,
+        memo: [],
+        fee: [BigInt(10)],
+        from_subaccount: [],
+        created_at_time: []
+      };
+  
+      // Realiza a transferência
+      const result = await actorLedger.icrc1_transfer(args);
+      console.log("Transferência realizada:", result);
+  
+      // Chama o backend para registrar a compra
+      const compra = await icpstore_backend.registerPurchase(produto, Number(valor));
+      alert(compra.message);
+  
+    } catch (error) {
+      console.error("Erro ao comprar:", error);
+      alert("A transferência foi concluída com sucesso, mas com algumas ressalvas: " + error.message);
+    }
+
+    await getAccountFromBalance(lojaCanisterId);
+    await getAccountToBalance(lojaCanisterId);
+  };
+
   return (
     <div className="container">
       <h1 className="titulo">Loja de Cursos da ICP</h1>
@@ -29,7 +125,7 @@ function App() {
             <h2 className="card-titulo">{p.title}</h2>
             <p className="descricao">{p.description}</p>
             <p className="preco">{p.price} ICPSC</p>
-            <button className="botao">Comprar</button>
+            <button className="botao" onClick={() => comprarProduto(p)}>Comprar</button>
           </div>
         ))}
       </div>
